@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+  <meta charset="UTF-8">
+  <title>Aplikacion Moti</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0f0f1a, #1a1a2e);
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: #1a1a2e;
+      padding: 30px;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      border: 1px solid #e94560;
+    }
+
+    h1 {
+      text-align: center;
+      color: #e94560;
+      margin-bottom: 25px;
+    }
+
+    .search-box {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 25px;
+    }
+
+    input {
+      flex: 1;
+      padding: 12px 15px;
+      border: none;
+      border-radius: 8px;
+      background: #16213e;
+      color: white;
+      font-size: 15px;
+    }
+
+    input::placeholder {
+      color: #888;
+    }
+
+    button {
+      padding: 12px 18px;
+      background: #e94560;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    button:hover {
+      background: #ff6b81;
+    }
+
+    .weather-info {
+      text-align: center;
+      display: none;
+    }
+
+    .weather-info.active {
+      display: block;
+    }
+
+    .city {
+      font-size: 28px;
+      margin-bottom: 5px;
+    }
+
+    .temp {
+      font-size: 64px;
+      font-weight: bold;
+      color: #e94560;
+      margin: 10px 0;
+    }
+
+    .description {
+      font-size: 20px;
+      text-transform: capitalize;
+      margin-bottom: 20px;
+      color: #ccc;
+    }
+
+    .details {
+      display: flex;
+      justify-content: space-around;
+      background: #16213e;
+      padding: 15px;
+      border-radius: 10px;
+    }
+
+    .detail {
+      text-align: center;
+    }
+
+    .detail span {
+      display: block;
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 5px;
+    }
+
+    .detail strong {
+      font-size: 18px;
+    }
+
+    .error {
+      text-align: center;
+      color: #e94560;
+      margin-top: 15px;
+      display: none;
+    }
+
+    .loading {
+      text-align: center;
+      color: #aaa;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Moti</h1>
+
+    <div class="search-box">
+      <input type="text" id="cityInput" placeholder="Shkruaj qytetin...">
+      <button onclick="getWeather()">Kërko</button>
+    </div>
+
+    <div class="loading" id="loading">Duke u ngarkuar...</div>
+    <div class="error" id="error">Qyteti nuk u gjet!</div>
+
+    <div class="weather-info" id="weatherInfo">
+      <div class="city" id="city">--</div>
+      <div class="temp" id="temp">--°</div>
+      <div class="description" id="description">--</div>
+
+      <div class="details">
+        <div class="detail">
+          <span>Lagështia</span>
+          <strong id="humidity">--%</strong>
+        </div>
+        <div class="detail">
+          <span>Era</span>
+          <strong id="wind">-- km/h</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const apiKey = "4d8fb5b93d4af21d66a281aabb72d1a6"; // API key publike për demo
+
+    async function getWeather() {
+      const city = document.getElementById("cityInput").value.trim();
+      const loading = document.getElementById("loading");
+      const error = document.getElementById("error");
+      const weatherInfo = document.getElementById("weatherInfo");
+
+      if (!city) {
+        alert("Shkruaj një qytet!");
+        return;
+      }
+
+      loading.style.display = "block";
+      error.style.display = "none";
+      weatherInfo.classList.remove("active");
+
+      try {
+        const response = await fetch(
+          `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric&lang=sq`
+        );
+
+        if (!response.ok) {
+          throw new Error("Qyteti nuk u gjet");
+        }
+
+        const data = await response.json();
+
+        document.getElementById("city").textContent = data.name + ", " + data.sys.country;
+        document.getElementById("temp").textContent = Math.round(data.main.temp) + "°C";
+        document.getElementById("description").textContent = data.weather[0].description;
+        document.getElementById("humidity").textContent = data.main.humidity + "%";
+        document.getElementById("wind").textContent = Math.round(data.wind.speed * 3.6) + " km/h";
+
+        weatherInfo.classList.add("active");
+      } catch (err) {
+        error.style.display = "block";
+      } finally {
+        loading.style.display = "none";
+      }
+    }
+
+    // Mund të shtypësh Enter
+    document.getElementById("cityInput").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") {
+        getWeather();
+      }
+    });
+  </script>
+
+</body>
+</html>
